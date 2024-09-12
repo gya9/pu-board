@@ -7,6 +7,7 @@ let currentMode = 'move';
 let isDrawing = false;
 let startX, startY;
 let uploadedImage = null;
+let shapes = []; // 描画した図形を保持する配列
 
 document.getElementById('move-icon').addEventListener('click', () => {
     currentMode = 'move';
@@ -59,7 +60,7 @@ canvas.addEventListener('mousedown', (event) => {
 
 canvas.addEventListener('mousemove', (event) => {
     if (isDrawing && (currentMode === 'line' || currentMode === 'arrow')) {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);  // 画面をクリアして再描画
+        redrawCanvas();  // 再描画してから現在の図形を描く
         const currentX = event.clientX - canvas.offsetLeft;
         const currentY = event.clientY - canvas.offsetTop;
         drawLine(startX, startY, currentX, currentY, currentMode === 'arrow');
@@ -68,7 +69,18 @@ canvas.addEventListener('mousemove', (event) => {
     }
 });
 
-canvas.addEventListener('mouseup', () => {
+canvas.addEventListener('mouseup', (event) => {
+    if (isDrawing && (currentMode === 'line' || currentMode === 'arrow')) {
+        const endX = event.clientX - canvas.offsetLeft;
+        const endY = event.clientY - canvas.offsetTop;
+        shapes.push({
+            type: currentMode,
+            startX: startX,
+            startY: startY,
+            endX: endX,
+            endY: endY
+        });
+    }
     isDrawing = false;
 });
 
@@ -99,4 +111,19 @@ function erase(event) {
     const x = event.clientX - canvas.offsetLeft;
     const y = event.clientY - canvas.offsetTop;
     ctx.clearRect(x - 10, y - 10, 20, 20);  // 消しゴムのサイズ
+    shapes = shapes.filter(shape => !isShapeNear(shape, x, y));  // 図形が消しゴムの位置に近いかチェック
+    redrawCanvas();  // 再描画
+}
+
+function isShapeNear(shape, x, y) {
+    const tolerance = 10;  // 許容範囲
+    return (Math.abs(shape.startX - x) < tolerance && Math.abs(shape.startY - y) < tolerance) ||
+           (Math.abs(shape.endX - x) < tolerance && Math.abs(shape.endY - y) < tolerance);
+}
+
+function redrawCanvas() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);  // キャンバスをクリア
+    shapes.forEach(shape => {
+        drawLine(shape.startX, shape.startY, shape.endX, shape.endY, shape.type === 'arrow');
+    });
 }
