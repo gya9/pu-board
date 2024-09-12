@@ -1,0 +1,31 @@
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+}
+
+.toolbar {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 10px;
+}
+
+button {
+    margin: 0 10px;
+    padding: 10px;
+    background-color: #f0f0f0;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+canvas {
+    border: 2px solid black;
+    display: block;
+    margin: 0 auto;
+    cursor: crosshair;
+    background-color: #fff;
+}
+
+canvas.active-cursor {
+    cursor: move;
+}
